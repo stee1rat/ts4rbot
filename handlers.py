@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import random
-from constants import who
+import re
+
+from constants import who, who_quotes
 
 
 def whoami(update, context):
+    save_username(update, context)
     answer = f"@{update.message.from_user.username}, вы — "
     
     if random.choice([0, 1, 2]) == 2:
@@ -22,3 +25,18 @@ def whoami(update, context):
 
     update.message.reply_text(answer, quote=False)
 
+
+def save_username(update, context):
+    if 'users' not in context.chat_data:
+        context.chat_data['users'] = []
+    if update.message.from_user.username not in context.chat_data['users']:
+        context.chat_data['users'].append(update.message.from_user.username)
+
+
+def whois(update, context):
+    save_username(update, context)
+    who = re.sub('Царь.*кто', '', update.message.text, flags=re.I)
+    who = who.replace('?','').strip().lower()
+    who = random.choice(who_quotes) + ' ' + who + ' - @'
+    who += random.choice(context.chat_data['users'])
+    update.message.reply_text(who.capitalize(), quote=False)

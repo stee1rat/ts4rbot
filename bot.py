@@ -4,7 +4,7 @@ import logging
 import re
 import settings
 
-from handlers import whoami
+from handlers import whoami, save_username, whois
 from telegram.ext import Filters, MessageHandler, Updater
 
 logging.basicConfig(filename='bot.log',
@@ -21,6 +21,15 @@ def main():
             whoami
         )
     )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(re.compile("(?i)(Царь.*кто.*)", re.IGNORECASE)),
+            whois
+        )
+    )
+
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, save_username))
 
     updater.start_polling()
     updater.idle()
