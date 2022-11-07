@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 import random
 from constants import who
 

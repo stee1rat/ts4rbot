@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 import logging
 import re
 import settings
