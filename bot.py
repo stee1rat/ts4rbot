@@ -4,7 +4,7 @@ import logging
 import re
 import settings
 
-from handlers import whoami, save_username, whois, info
+from handlers import whoami, save_username, whois, info, weather
 from telegram.ext import Filters, MessageHandler, Updater
 
 logging.basicConfig(filename='bot.log',
@@ -35,6 +35,14 @@ def main():
             info
         )
     )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(re.compile("(?i)(Царь.*погода.*)", re.IGNORECASE)),
+            weather
+        )
+    )
+
 
     updater.dispatcher.add_handler(MessageHandler(Filters.text, save_username))
 
