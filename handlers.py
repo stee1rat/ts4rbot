@@ -26,6 +26,12 @@ def whoami(update, context):
     update.message.reply_text(answer, quote=False)
 
 
+def info(update, context):
+    save_username(update, context)
+    answer = f"Вероятность составляет: {random.randrange(100)}%"
+    update.message.reply_text(answer)
+
+
 def save_username(update, context):
     if 'users' not in context.chat_data:
         context.chat_data['users'] = []
