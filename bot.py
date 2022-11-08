@@ -31,7 +31,7 @@ def main():
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*инфа.*)", re.IGNORECASE)),
+            Filters.regex(re.compile("(?i)(Царь.*(инфа|вероятность).*)", re.IGNORECASE)),
             info
         )
     )
