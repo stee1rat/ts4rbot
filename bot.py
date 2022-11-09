@@ -17,7 +17,7 @@ def main():
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*кто все( |\?)*)", re.IGNORECASE)),
+            Filters.regex(re.compile("(?i)(Царь.*кто все( |\?)*$)", re.IGNORECASE)),
             whostats
         )
     )
@@ -38,7 +38,8 @@ def main():
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*(инфа|вероятность).*)", re.IGNORECASE)),
+            Filters.regex(re.compile("(?i)(Царь.*(инфа|вероятность).*)", 
+                          re.IGNORECASE)),
             info
         )
     )

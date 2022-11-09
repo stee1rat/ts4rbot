@@ -54,7 +54,7 @@ def weather(update, context):
 
     answer = '`'
     answer += city.capitalize()
-    answer += f"\n"
+    answer += "\n"
     answer += f"{weather_icons[observation.weather_icon_name]} "
 
     answer += f"{round(weather['temp'])}°C\n"
@@ -107,9 +107,9 @@ def whoami(update, context):
 def whois(update, context):
     save_username(update, context)
     who = re.sub('Царь.*кто', '', update.message.text, flags=re.I)
-    who = who.replace('?','').strip().lower()
+    who = who.replace('?', '').strip().lower()
     who = random.choice(who_quotes) + ' ' + who + ' - @'
-    who += random.choice(context.chat_data['users'])
+    who += random.choice(list(context.chat_data['users'].keys()))
     update.message.reply_text(who.capitalize(), quote=False)
 
 
