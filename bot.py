@@ -4,7 +4,7 @@ import logging
 import re
 import settings
 
-from handlers import whoami, whois, info, weather, whostats, stats
+from handlers import whoami, whois, info, weather, names, stats, top
 
 from telegram import Update
 from telegram.ext import (
@@ -24,9 +24,16 @@ def main():
 
     updater.dispatcher.add_handler(
         MessageHandler(
+            Filters.regex(re.compile("(?i)(Царь.*топ)", re.IGNORECASE)),
+            top
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
             Filters.regex(re.compile("(?i)(Царь.*кто все( |\?)*$)",
                           re.IGNORECASE)),
-            whostats
+            names
         )
     )
 

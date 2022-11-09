@@ -30,11 +30,44 @@ def info(update, context):
 
 
 def stats(update, context):
-    print(context.chat_data)
+    username = update.message.from_user.username
+
     if 'users' not in context.chat_data:
         context.chat_data['users'] = {}
-    if update.message.from_user.username not in context.chat_data['users']:
-        context.chat_data['users'][update.message.from_user.username] = ''
+
+    if username not in context.chat_data['users']:
+        context.chat_data['users'][username] = {
+            'name': '',
+            'messages': 0,
+            'words': 0
+        }
+
+    context.chat_data['users'][username]['messages'] += 1
+    context.chat_data['users'][username]['words'] += len(update.message.text)
+
+
+def top(update, context):
+    # Топ пользователей чата за всё время (символы | сообщения):
+    # 1. Владимир Васильев 🍺: 1239202 | 30609
+    # 2. Лёха Мортис 👾: 1020621 | 34709
+    # 3. Сергей Левин 👑: 1005726 | 53952
+    # 4. Vasiliy Aboymov 🔪: 448039 | 19621
+    # 5. Татьяна Сорокина 🔥: 341852 | 16249
+
+    #top = sorted(d.items(), key=lambda x: x[1])    
+    #top = context.chat_data['users'].items()
+    #print(top)
+
+    #sorted_top = context.chat_data['users'].items()
+    print(context.chat_data['users'].items())
+    #sorted_top = sorted(context.chat_data['users'], key=lambda x: context.chat_data['users']['words'])
+    # answer = ''
+    # for user, data in sorted_top:
+    #     if data:
+    #         answer += f"*{user}*: {data['words']}\n"
+    # update.message.reply_text(
+    #     answer, quote=False, parse_mode=ParseMode.MARKDOWN
+    # )
 
 
 def weather(update, context):
@@ -97,8 +130,10 @@ def whoami(update, context):
     name += random.choice(who[0]) + ' ' + random.choice(who[1])
     name += ' ' + extension['1'] if '1' in extension else ''
 
-    context.chat_data['users'][update.message.from_user.username] = name
-    answer = f"@{update.message.from_user.username}, вы — {name}"
+    username = update.message.from_user.username
+    print(context.chat_data)
+    context.chat_data['users'][username]['name'] = name
+    answer = f"@{username}, вы — {name}"
     update.message.reply_text(answer, quote=False)
 
 
@@ -110,13 +145,12 @@ def whois(update, context):
     update.message.reply_text(who.capitalize(), quote=False)
 
 
-def whostats(update, context):
+def names(update, context):
     answer = ''
     for user, name in context.chat_data['users'].items():
         if name:
-            answer += f"*{user}* - {name}\n"
+            answer += f"*{user}* - {name['name']}\n"
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN
     )
-
 
