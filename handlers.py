@@ -34,9 +34,9 @@ def info(update, context):
 
 def save_username(update, context):
     if 'users' not in context.chat_data:
-        context.chat_data['users'] = []
+        context.chat_data['users'] = {}
     if update.message.from_user.username not in context.chat_data['users']:
-        context.chat_data['users'].append(update.message.from_user.username)
+        context.chat_data['users'][update.message.from_user.username] = ''
 
 
 def weather(update, context):
@@ -55,10 +55,8 @@ def weather(update, context):
     answer = '`'
     answer += city.capitalize()
     answer += f"\n"
-
     answer += f"{weather_icons[observation.weather_icon_name]} "
-    #answer += f"Сегодня: "
-    
+
     answer += f"{round(weather['temp'])}°C\n"
     answer += f"{observation.detailed_status}\n".capitalize()
     answer += f"\nОщущается как {round(weather['feels_like'])}°C\n"
@@ -87,29 +85,22 @@ def weather(update, context):
         answer += d.strftime('%a, %b %d') + ' '
         answer += weather_icons[day['weather'][0]['icon']] + ' '
         answer += str(round(day['temp']['day'])) + "°C"
-        #answer += ' ' + day['weather'][0]['description']
-    
+
     answer += '`'
     update.message.reply_text(answer, quote=False, parse_mode=ParseMode.MARKDOWN)
- 
+
 
 def whoami(update, context):
     save_username(update, context)
-    answer = f"@{update.message.from_user.username}, вы — "
-    
-    if random.choice([0, 1, 2]) == 2:
-        extension = random.choice(who[2])
-    else:
-        extension = ''
 
-    if '0' in extension:
-        answer += extension['0'] + ' '
+    extension = random.choice(who[2]) if random.randrange(3) == 2 else ''
 
-    answer += random.choice(who[0]) + ' ' + random.choice(who[1])
+    name = extension['0'] + ' ' if '0' in extension else ''
+    name += random.choice(who[0]) + ' ' + random.choice(who[1])
+    name += ' ' + extension['1'] if '1' in extension else ''
 
-    if '1' in extension:
-        answer += ' ' + extension['1']
-
+    context.chat_data['users'][update.message.from_user.username] = name
+    answer = f"@{update.message.from_user.username}, вы — {name}"
     update.message.reply_text(answer, quote=False)
 
 
@@ -120,3 +111,13 @@ def whois(update, context):
     who = random.choice(who_quotes) + ' ' + who + ' - @'
     who += random.choice(context.chat_data['users'])
     update.message.reply_text(who.capitalize(), quote=False)
+
+
+def whostats(update, context):
+    save_username(update, context)
+    answer = ''
+    for user, name in context.chat_data['users'].items():
+        if name:
+            answer += f"{user} - {name}"
+    update.message.reply_text(answer, quote=False)
+
