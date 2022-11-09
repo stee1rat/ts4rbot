@@ -87,7 +87,9 @@ def weather(update, context):
         answer += str(round(day['temp']['day'])) + "°C"
 
     answer += '`'
-    update.message.reply_text(answer, quote=False, parse_mode=ParseMode.MARKDOWN)
+    update.message.reply_text(
+        answer, quote=False, parse_mode=ParseMode.MARKDOWN
+    )
 
 
 def whoami(update, context):
@@ -118,6 +120,8 @@ def whostats(update, context):
     answer = ''
     for user, name in context.chat_data['users'].items():
         if name:
-            answer += f"{user} - {name}\n"
-    update.message.reply_text(answer, quote=False)
+            answer += f"*{user}* - {name}\n"
+    update.message.reply_text(
+        answer, quote=False, parse_mode=ParseMode.MARKDOWN
+    )
 
