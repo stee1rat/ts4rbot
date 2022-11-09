@@ -118,6 +118,6 @@ def whostats(update, context):
     answer = ''
     for user, name in context.chat_data['users'].items():
         if name:
-            answer += f"{user} - {name}"
+            answer += f"{user} - {name}\n"
     update.message.reply_text(answer, quote=False)
 
