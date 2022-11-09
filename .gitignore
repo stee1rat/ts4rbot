@@ -3,8 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Bot settings
+settings.py
+
 # C extensions
 *.so
+
+# Databases
+*.db
 
 # Distribution / packaging
 .Python
@@ -122,5 +128,3 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Bot settings
-settings.py

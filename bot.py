@@ -4,8 +4,12 @@ import logging
 import re
 import settings
 
-from handlers import whoami, save_username, whois, info, weather, whostats
-from telegram.ext import Filters, MessageHandler, Updater
+from handlers import whoami, whois, info, weather, whostats, stats
+
+from telegram import Update
+from telegram.ext import (
+    Filters, MessageHandler, TypeHandler, Updater, PicklePersistence
+)
 
 logging.basicConfig(filename='bot.log',
                     level=logging.INFO,
@@ -13,11 +17,15 @@ logging.basicConfig(filename='bot.log',
 
 
 def main():
-    updater = Updater(settings.API_KEY, use_context=True)
+    db = PicklePersistence(filename='bot.db')
+
+    updater = Updater(settings.API_KEY, use_context=True, persistence=db)
+    updater.dispatcher.add_handler(TypeHandler(Update, stats), -1)
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*кто все( |\?)*$)", re.IGNORECASE)),
+            Filters.regex(re.compile("(?i)(Царь.*кто все( |\?)*$)",
+                          re.IGNORECASE)),
             whostats
         )
     )
@@ -50,8 +58,6 @@ def main():
             weather
         )
     )
-
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, save_username))
 
     updater.start_polling()
     updater.idle()

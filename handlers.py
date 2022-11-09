@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-
+import locale
 import random
 import re
 import requests
-
 import settings
 
 from constants import who, who_quotes, weather_icons
@@ -13,9 +12,8 @@ from geopy.geocoders import Nominatim
 from pyowm.owm import OWM
 from pyowm.utils.config import get_default_config
 from telegram import ParseMode
-from pprint import pprint
 
-import locale
+
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 OWM_KEY = settings.OWM_KEY
@@ -27,12 +25,12 @@ config_dict['units'] = "celsius"
 
 
 def info(update, context):
-    save_username(update, context)
     answer = f"Вероятность составляет: {random.randrange(100)}%"
     update.message.reply_text(answer)
 
 
-def save_username(update, context):
+def stats(update, context):
+    print(context.chat_data)
     if 'users' not in context.chat_data:
         context.chat_data['users'] = {}
     if update.message.from_user.username not in context.chat_data['users']:
@@ -93,8 +91,6 @@ def weather(update, context):
 
 
 def whoami(update, context):
-    save_username(update, context)
-
     extension = random.choice(who[2]) if random.randrange(3) == 2 else ''
 
     name = extension['0'] + ' ' if '0' in extension else ''
@@ -107,7 +103,6 @@ def whoami(update, context):
 
 
 def whois(update, context):
-    save_username(update, context)
     who = re.sub('Царь.*кто', '', update.message.text, flags=re.I)
     who = who.replace('?', '').strip().lower()
     who = random.choice(who_quotes) + ' ' + who + ' - @'
@@ -116,7 +111,6 @@ def whois(update, context):
 
 
 def whostats(update, context):
-    save_username(update, context)
     answer = ''
     for user, name in context.chat_data['users'].items():
         if name:
@@ -124,4 +118,5 @@ def whostats(update, context):
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN
     )
+
 
