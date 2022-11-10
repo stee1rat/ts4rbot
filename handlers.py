@@ -47,27 +47,16 @@ def stats(update, context):
 
 
 def top(update, context):
-    # Топ пользователей чата за всё время (символы | сообщения):
-    # 1. Владимир Васильев 🍺: 1239202 | 30609
-    # 2. Лёха Мортис 👾: 1020621 | 34709
-    # 3. Сергей Левин 👑: 1005726 | 53952
-    # 4. Vasiliy Aboymov 🔪: 448039 | 19621
-    # 5. Татьяна Сорокина 🔥: 341852 | 16249
+    data = list(context.chat_data['users'].items())
+    sorted_data = sorted(data, key=lambda x: x[1]['words'])
 
-    #top = sorted(d.items(), key=lambda x: x[1])    
-    #top = context.chat_data['users'].items()
-    #print(top)
-
-    #sorted_top = context.chat_data['users'].items()
-    print(context.chat_data['users'].items())
-    #sorted_top = sorted(context.chat_data['users'], key=lambda x: context.chat_data['users']['words'])
-    # answer = ''
-    # for user, data in sorted_top:
-    #     if data:
-    #         answer += f"*{user}*: {data['words']}\n"
-    # update.message.reply_text(
-    #     answer, quote=False, parse_mode=ParseMode.MARKDOWN
-    # )
+    answer = '`Топ (символы / сообщения):\n\n'
+    for i, (user, data) in enumerate(sorted_data):
+        answer += f"{i+1}. {user}: {data['words']} / {data['messages']}\n"
+    answer += '`'
+    update.message.reply_text(
+        answer, quote=False, parse_mode=ParseMode.MARKDOWN
+    )
 
 
 def weather(update, context):
@@ -147,9 +136,9 @@ def whois(update, context):
 
 def names(update, context):
     answer = ''
-    for user, name in context.chat_data['users'].items():
-        if name:
-            answer += f"*{user}* - {name['name']}\n"
+    for user, data in context.chat_data['users'].items():
+        if data['name']:
+            answer += f"*{user}* - {data['name']}\n"
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN
     )
