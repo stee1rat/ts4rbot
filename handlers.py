@@ -120,7 +120,6 @@ def whoami(update, context):
     name += ' ' + extension['1'] if '1' in extension else ''
 
     username = update.message.from_user.username
-    print(context.chat_data)
     context.chat_data['users'][username]['name'] = name
     answer = f"@{username}, вы — {name}"
     update.message.reply_text(answer, quote=False)
