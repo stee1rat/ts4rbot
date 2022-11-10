@@ -48,7 +48,7 @@ def stats(update, context):
 
 def top(update, context):
     data = list(context.chat_data['users'].items())
-    sorted_data = sorted(data, key=lambda x: x[1]['words'])
+    sorted_data = sorted(data, key=lambda x: x[1]['words'], reverse=True)
 
     answer = '`Топ (символы / сообщения):\n\n'
     for i, (user, data) in enumerate(sorted_data):
