@@ -1,27 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import datetime
 import locale
 import random
 import re
 import requests
-import settings
 
-from constants import who, who_quotes, weather_icons
-from geopy.geocoders import Nominatim
-from pyowm.owm import OWM
-from pyowm.utils.config import get_default_config
+from constants import who, who_quotes, weather_codes
+from datetime import datetime
 from telegram import ParseMode
 
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
-
-OWM_KEY = settings.OWM_KEY
-
-owm = OWM(OWM_KEY)
-config_dict = get_default_config()
-config_dict['language'] = 'ru'
-config_dict['units'] = "celsius"
 
 
 def info(update, context):
@@ -52,7 +41,7 @@ def top(update, context):
 
     answer = '`Топ (символы / сообщения):\n\n'
     for i, (user, data) in enumerate(sorted_data):
-        answer += f"{i+1}. {user}: {data['words']} / {data['messages']}\n"
+        answer += f"{i+1}) {user}: {data['words']} / {data['messages']}\n"
     answer += '`'
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN
@@ -63,50 +52,64 @@ def weather(update, context):
     city = re.sub('Царь.*погода', '', update.message.text, flags=re.I)
     city = city.strip().lower()
 
-    geolocator = Nominatim(user_agent="ts4rbot")
-    address = geolocator.geocode(city)
-    lat = address.latitude
-    lon = address.longitude
-
-    mgr = owm.weather_manager()
-    observation = mgr.weather_at_coords(lat, lon).weather
-    weather = observation.temperature('celsius')
-
-    answer = '`'
-    answer += city.capitalize()
-    answer += "\n"
-    answer += f"{weather_icons[observation.weather_icon_name]} "
-
-    answer += f"{round(weather['temp'])}°C\n"
-    answer += f"{observation.detailed_status}\n".capitalize()
-    answer += f"\nОщущается как {round(weather['feels_like'])}°C\n"
-    sunrise = datetime.datetime.fromtimestamp(observation.sunrise_time())
-    answer += f"Восход в {sunrise.strftime('%H:%M')}\n"
-    sunset = datetime.datetime.fromtimestamp(observation.sunset_time())
-    answer += f"Закат в {sunset.strftime('%H:%M')}"
-    answer += "\n"
-
-    weather_url = "https://api.openweathermap.org/data/2.5/onecall"
+    nominatim_url = "https://nominatim.openstreetmap.org/search"
     params = {
-        "lat": lat,
-        "lon": lon,
-        "appid": OWM_KEY,
-        "units": "metric",
-        "lang": "ru",
-        "exclude": "minutely,hourly"
+        "q": city,
+        "format": "json",
+        "limit": 1,
+        "accept-language": "russian"
     }
 
-    result = requests.get(weather_url, params=params)
-    weather = result.json()
+    result = requests.get(nominatim_url, params=params).json()
+    lat = result[0]['lat']
+    lon = result[0]['lon']
 
-    for day in weather['daily']:
-        d = datetime.datetime.fromtimestamp(day['dt'])
-        answer += '\n'
-        answer += d.strftime('%a, %b %d') + ' '
-        answer += weather_icons[day['weather'][0]['icon']] + ' '
-        answer += str(round(day['temp']['day'])) + "°C"
+    weather_url = "https://api.open-meteo.com/v1/forecast"
+
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "daily": {
+            "temperature_2m_max",
+            "temperature_2m_min",
+            "weathercode",
+            "sunrise",
+            "sunset",
+            "apparent_temperature_max",
+            "apparent_temperature_min"
+        },
+        "timezone": "auto",
+        "timeformat": "unixtime"
+    }
+
+    result = requests.get(weather_url, params=params).json()
+    daily = result["daily"]
+
+    answer = '`'
+    answer += f"{city.capitalize()}\n\n"
+
+    min = daily['temperature_2m_min'][0]
+    max = daily['temperature_2m_max'][0]
+    feels_min = daily['apparent_temperature_min'][0]
+    feels_max = daily['apparent_temperature_max'][0]
+
+    sunrise = datetime.fromtimestamp(daily['sunrise'][0]).strftime('%H:%M')
+    sunset = datetime.fromtimestamp(daily['sunset'][0]).strftime('%H:%M')
+
+    answer += f"{'Сейчас: ':<11}{round((min+max)/2)}°C\n"
+    answer += f"{'Ощущается: ':<11}{round((feels_min+feels_max)/2)}°C\n"
+    answer += f"{'Восход: ':<11}{sunrise}\n"
+    answer += f"{'Закат: ':<11}{sunset}\n\n"
+
+    for i, time in enumerate(daily['time']):
+        answer += f"{datetime.fromtimestamp(time).strftime('%a, %b %d'):<12} "
+        min = daily['temperature_2m_min'][i]
+        max = daily['temperature_2m_max'][i]
+        code = weather_codes[daily['weathercode'][i]][1]
+        answer += f"{code}{round((min+max)/2):>3}°C\n"
 
     answer += '`'
+
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN
     )

@@ -137,23 +137,34 @@ who_quotes = [
   'давно уже не новость, что', 'поступила информация, что'
 ]
 
-weather_icons = {
-  "01d": "☀️",
-  "02d": "⛅️",
-  "03d": "☁️",
-  "04d": "☁",
-  "09d": "🌧",
-  "10d": "🌦",
-  "11d": "⛈",
-  "13d": "❄️",
-  "50d": "🌫",
-  "01n": "☀️",
-  "02n": "⛅️",
-  "03n": "☁️",
-  "04n": "☁",
-  "09n": "🌧",
-  "10n": "🌦",
-  "11n": "⛈",
-  "13n": "❄️",
-  "50n": "🌫" 
+weather_codes = {
+    0: ("Clear sky", "☀️"),
+    1: ("Mainly clear", "⛅️"),
+    2: ("partly cloudy", "☁️"),
+    3: ("overcast", "☁️"),
+    45: ("Fog", "🌫"),
+    48: ("Fog", "🌫"),
+    51: ("Drizzle: Light", "🌦"),
+    53: ("Drizzle: Moderate", "🌧"),
+    55: ("Drizzle: Heavy", "🌧"),
+    56: ("Freezing Drizzle: Light", "🌨"),
+    57: ("Freezing Drizzle: Dense", "🌨"),
+    61: ("Rain: Slight", "🌧"),
+    63: ("Rain: Moderate", "🌧"),
+    65: ("Rain: Heavy", "⛈"),
+    66: ("Freezing Rain: Light", "🌨"),
+    67: ("Freezing Rain: Heavy", "🌨"),
+    71: ("Snow fall: Slight", "❄️"),
+    73: ("Snow fall: Moderate", "❄️"),
+    75: ("Snow fall: Heavy", "❄️"),
+    77: ("Snow grains", "❄️"),
+    80: ("Rain showers: Slight", "🌧"),
+    81: ("Rain showers: Moderate", "🌧"),
+    82: ("Rain showers: Heavy", "⛈"),
+    85: ("Snow showers: Slight", "❄️"),
+    86: ("Snow showers: Heavy", "❄️"),
+    95: ("Thunderstorm", "⛈"),
+    96: ("Thunderstorm: slight", "⛈"),
+    99: ("Thunderstorm: heavy", "⛈")
 }
+
