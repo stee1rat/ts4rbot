@@ -188,20 +188,19 @@ def quiz(update, context):
 
 
 def quiz_answer(update, context):
-    reply = "Сейчас нет активных квизов"
+    #reply = "Сейчас нет активных квизов"
     for job in context.job_queue.jobs():
         if job.name == "quiz" + str(update.effective_message.chat_id):
-            reply = "Квиз запущен"
             answer = int(re.findall("\d$", update.message.text)[0])
             username = update.message.from_user.username
             if "quiz" not in job.context:
                 job.context["quiz"] = {}
             job.context["quiz"][username] = answer
-            reply = "Ответы:\n"
-            for key, val in job.context["quiz"].items():
-                reply += f"{key}: {val}\n"
+            # reply = "Ответы:\n"
+            # for key, val in job.context["quiz"].items():
+            #     reply += f"{key}: {val}\n"
             break
-    update.message.reply_text(reply, quote=False)
+    #update.message.reply_text(reply, quote=False)
 
 
 def quiz_finish(context):
