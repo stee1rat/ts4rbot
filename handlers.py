@@ -165,7 +165,7 @@ def quiz(update, context):
     reply = f"{question}\n\n"
     for i, a in enumerate(answers):
         reply += f"{i + 1}) {a.strip()}\n"
-    reply += "\nПроверка ответов через пол минуты."
+    reply += "\nПроверка ответов через 20 секунд."
 
     con.close()
 
@@ -181,7 +181,7 @@ def quiz(update, context):
     remove_job_if_exists("quiz" + str(chat_id), context)
 
     context.job_queue.run_once(
-        quiz_finish, 30, name="quiz" + str(chat_id), context=data
+        quiz_finish, 20, name="quiz" + str(chat_id), context=data
     )
 
     update.message.reply_text(reply, quote=False)
@@ -245,7 +245,7 @@ def quiz_top(update, context):
     for i, (user, data) in enumerate(sorted_data):
         answer += f"{i+1}) {user}: "
         answer += f"{data['correct']} / {data['answers']} "
-        answer += f"({round(data['correct']/data['answers'], 2)}%)\n"
+        answer += f"({round(data['correct']/data['answers']*100)}%)\n"
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN
     )
