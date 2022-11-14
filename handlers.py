@@ -9,6 +9,7 @@ import sqlite3
 from constants import who, who_quotes, weather_codes
 from datetime import datetime
 from telegram import ParseMode
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from utils import remove_job_if_exists
 
@@ -163,44 +164,57 @@ def quiz(update, context):
     correct_index = answers.index(correct_answer) + 1
 
     reply = f"{question}\n\n"
+
+    buttons = []
+    keyboard = []
+
+    longest_answer = len(sorted(answers, key=len, reverse=True)[0])
     for i, a in enumerate(answers):
-        reply += f"{i + 1}) {a.strip()}\n"
-    reply += "\nПроверка ответов через 20 секунд."
+        buttons.append(
+            InlineKeyboardButton(
+                a.strip(), callback_data=str(i + 1)+','+a.strip()
+            )
+        )
+        if i % 2 == 1 or longest_answer > 15:
+            keyboard.append(buttons)
+            buttons = []
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
     con.close()
 
     chat_id = update.effective_message.chat_id
 
-    data = {
-        'chat_id': chat_id,
-        'correct_answer': correct_answer,
-        'correct_index': correct_index,
-        'context': context
-    }
-
     remove_job_if_exists("quiz" + str(chat_id), context)
 
-    context.job_queue.run_once(
-        quiz_finish, 20, name="quiz" + str(chat_id), context=data
+    message = update.message.reply_text(
+        reply, quote=False, reply_markup=reply_markup
     )
 
-    update.message.reply_text(reply, quote=False)
+    data = {
+        'chat_id': chat_id,
+        'message_id': message.message_id,
+        'correct_answer': correct_answer,
+        'correct_index': correct_index,
+        'context': context,
+        'question': question
+    }
+
+    context.job_queue.run_once(
+        quiz_finish, 10, name="quiz" + str(chat_id), context=data
+    )
 
 
 def quiz_answer(update, context):
-    #reply = "Сейчас нет активных квизов"
+    query = update.callback_query
+    query.answer()
     for job in context.job_queue.jobs():
         if job.name == "quiz" + str(update.effective_message.chat_id):
-            answer = int(re.findall("\d$", update.message.text)[0])
-            username = update.message.from_user.username
+            username = query.from_user.username
             if "quiz" not in job.context:
                 job.context["quiz"] = {}
-            job.context["quiz"][username] = answer
-            # reply = "Ответы:\n"
-            # for key, val in job.context["quiz"].items():
-            #     reply += f"{key}: {val}\n"
+            job.context["quiz"][username] = query.data
             break
-    #update.message.reply_text(reply, quote=False)
 
 
 def quiz_finish(context):
@@ -213,7 +227,8 @@ def quiz_finish(context):
     if "quiz_stats" not in chat_data:
         chat_data["quiz_stats"] = {}
 
-    reply = f"Правильный ответ: {correct_answer} ({correct_index})\n\n"
+    reply = job["question"] + "\n\n"
+    reply += f"Правильный ответ: {correct_answer}\n\n"
 
     if "quiz" in job:
         for username, value in job["quiz"].items():
@@ -222,16 +237,20 @@ def quiz_finish(context):
                     "answers": 0,
                     "correct": 0
                 }
+
             chat_data["quiz_stats"][username]["answers"] += 1
-            if value == correct_index:
+
+            if int(value.split(',')[0]) == correct_index:
                 result = "правильно"
                 chat_data["quiz_stats"][username]["correct"] += 1
             else:
-                result = "неправильно"
+                result = f"неправильно ({value.split(',')[1]})"
 
             reply += f"{username} ответил {result}\n"
 
-    context.bot.send_message(chat_id, text=reply)
+    context.bot.edit_message_text(
+        chat_id=chat_id, message_id=job["message_id"], text=reply
+    )
 
 
 def quiz_top(update, context):

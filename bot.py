@@ -5,13 +5,14 @@ import re
 import settings
 
 from handlers import (
-    whoami, whois, info, weather, names, stats, top, quiz, quiz_answer, 
+    whoami, whois, info, weather, names, stats, top, quiz, quiz_answer,
     quiz_top
 )
 
 from telegram import Update
 from telegram.ext import (
-    Filters, MessageHandler, TypeHandler, Updater, PicklePersistence
+    Filters, MessageHandler, TypeHandler, Updater, PicklePersistence,
+    CallbackQueryHandler
 )
 
 logging.basicConfig(filename='bot.log',
@@ -24,6 +25,8 @@ def main():
 
     updater = Updater(settings.API_KEY, use_context=True, persistence=db)
     updater.dispatcher.add_handler(TypeHandler(Update, stats), -1)
+
+    updater.dispatcher.add_handler(CallbackQueryHandler(quiz_answer))
 
     updater.dispatcher.add_handler(
         MessageHandler(
