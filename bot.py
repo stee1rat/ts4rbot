@@ -4,7 +4,10 @@ import logging
 import re
 import settings
 
-from handlers import whoami, whois, info, weather, names, stats, top
+from handlers import (
+    whoami, whois, info, weather, names, stats, top, quiz, quiz_answer, 
+    quiz_top
+)
 
 from telegram import Update
 from telegram.ext import (
@@ -21,6 +24,27 @@ def main():
 
     updater = Updater(settings.API_KEY, use_context=True, persistence=db)
     updater.dispatcher.add_handler(TypeHandler(Update, stats), -1)
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(re.compile("(?i)(Царь.*квиз топ)", re.IGNORECASE)),
+            quiz_top
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(re.compile("(?i)(Царь.*квиз)", re.IGNORECASE)),
+            quiz
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(re.compile("(?i)(Царь.*ответ [1-9])", re.IGNORECASE)),
+            quiz_answer
+        )
+    )
 
     updater.dispatcher.add_handler(
         MessageHandler(
