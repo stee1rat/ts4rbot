@@ -201,7 +201,7 @@ def quiz(update, context):
     }
 
     context.job_queue.run_once(
-        quiz_finish, 20, name="quiz" + str(chat_id), context=data
+        quiz_finish, 15, name="quiz" + str(chat_id), context=data
     )
 
 
