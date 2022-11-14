@@ -230,7 +230,7 @@ def quiz_finish(context):
             else:
                 result = "неправильно"
 
-            reply += f"{username} ответил {result}"
+            reply += f"{username} ответил {result}\n"
 
     context.bot.send_message(chat_id, text=reply)
 
@@ -246,6 +246,5 @@ def quiz_top(update, context):
         answer += f"{i+1}) {user}: "
         answer += f"{data['correct']} / {data['answers']} "
         answer += f"({round(data['correct']/data['answers']*100)}%)\n"
-    update.message.reply_text(
-        answer, quote=False, parse_mode=ParseMode.MARKDOWN
-    )
+
+    update.message.reply_text(answer, quote=False)
