@@ -6,13 +6,13 @@ import settings
 
 from handlers import (
     whoami, whois, info, weather, names, stats, top, quiz, quiz_answer,
-    quiz_top
+    quiztop
 )
 
 from telegram import Update
 from telegram.ext import (
     Filters, MessageHandler, TypeHandler, Updater, PicklePersistence,
-    CallbackQueryHandler
+    CallbackQueryHandler, CommandHandler
 )
 
 logging.basicConfig(filename='bot.log',
@@ -28,33 +28,11 @@ def main():
 
     updater.dispatcher.add_handler(CallbackQueryHandler(quiz_answer))
 
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*квиз топ)", re.IGNORECASE)),
-            quiz_top
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*квиз)", re.IGNORECASE)),
-            quiz
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*ответ [1-9])", re.IGNORECASE)),
-            quiz_answer
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*топ)", re.IGNORECASE)),
-            top
-        )
-    )
+    updater.dispatcher.add_handler(CommandHandler('quiztop', quiztop))
+    updater.dispatcher.add_handler(CommandHandler('quiz', quiz))
+    updater.dispatcher.add_handler(CommandHandler('top', top))
+    updater.dispatcher.add_handler(CommandHandler('whoami', whoami))
+    updater.dispatcher.add_handler(CommandHandler('names', names))
 
     updater.dispatcher.add_handler(
         MessageHandler(

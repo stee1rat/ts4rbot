@@ -43,13 +43,10 @@ def top(update, context):
     data = list(context.chat_data['users'].items())
     sorted_data = sorted(data, key=lambda x: x[1]['words'], reverse=True)
 
-    answer = '`Топ (символы / сообщения):\n\n'
+    answer = 'Топ (символы / сообщения):\n\n'
     for i, (user, data) in enumerate(sorted_data):
         answer += f"{i+1}) {user}: {data['words']} / {data['messages']}\n"
-    answer += '`'
-    update.message.reply_text(
-        answer, quote=False, parse_mode=ParseMode.MARKDOWN
-    )
+    update.message.reply_text(answer, quote=False)
 
 
 def weather(update, context):
@@ -99,17 +96,17 @@ def weather(update, context):
     sunrise = datetime.fromtimestamp(daily['sunrise'][0]).strftime('%H:%M')
     sunset = datetime.fromtimestamp(daily['sunset'][0]).strftime('%H:%M')
 
-    answer += f"{'Сейчас: ':<11}{round((min+max)/2)}°C\n"
-    answer += f"{'Ощущается: ':<11}{round((feels_min+feels_max)/2)}°C\n"
-    answer += f"{'Восход: ':<11}{sunrise}\n"
-    answer += f"{'Закат: ':<11}{sunset}\n\n"
+    answer += f"{'Сейчас: '}{round((min+max)/2)}°C\n"
+    answer += f"{'Ощущается: '}{round((feels_min+feels_max)/2)}°C\n"
+    answer += f"{'Восход: '}{sunrise}\n"
+    answer += f"{'Закат: '}{sunset}\n\n"
 
     for i, time in enumerate(daily['time']):
-        answer += f"{datetime.fromtimestamp(time).strftime('%a, %b %d'):<12} "
+        answer += f"{datetime.fromtimestamp(time).strftime('%a, %b %d'):<8} "
         min = daily['temperature_2m_min'][i]
         max = daily['temperature_2m_max'][i]
         code = weather_codes[daily['weathercode'][i]][1]
-        answer += f"{code}{round((min+max)/2):>3}°C\n"
+        answer += f"{code}{round((min+max)/2):>4}°C\n"
 
     answer += '`'
 
@@ -150,6 +147,10 @@ def names(update, context):
 
 
 def quiz(update, context):
+    for job in context.job_queue.jobs():
+        if job.name == "quiz" + str(update.effective_message.chat_id):
+            return
+
     con = sqlite3.connect("quiz.db")
     cur = con.cursor()
 
@@ -253,7 +254,7 @@ def quiz_finish(context):
     )
 
 
-def quiz_top(update, context):
+def quiztop(update, context):
     data = list(context.chat_data['quiz_stats'].items())
     sorted_data = sorted(
         data, key=lambda x: x[1]['correct']/x[1]['answers'], reverse=True
