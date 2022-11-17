@@ -6,8 +6,10 @@ import re
 import requests
 import sqlite3
 
+from bs4 import BeautifulSoup, Tag
 from constants import who, who_quotes, weather_codes
 from datetime import datetime
+from settings import BOT_NAME
 from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -15,6 +17,38 @@ from utils import remove_job_if_exists
 
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+
+
+def apod(update, context):
+    url = "http://www.astronet.ru/db/apod.html"
+    result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+
+    soup = BeautifulSoup(result.text, 'html.parser')
+    titles = soup.findAll('p', class_="title")
+    article = "http://www.astronet.ru" + titles[0].a.get('href')
+    result = requests.get(article, headers={'User-Agent': 'Mozilla/5.0'})
+
+    soup = BeautifulSoup(result.text, 'html.parser')
+    content = soup.find('div', id='content')
+    cur = content.find('b', text='Пояснение:').next_sibling
+
+    answer = ''
+    while cur.name != 'p':
+        if isinstance(cur, Tag):
+            for f in cur.findAll('font'):
+                f.unwrap()
+        answer += re.sub('\s+', ' ', str(cur).replace("\n", ""))
+        cur = cur.next_sibling
+
+    context.bot.send_photo(
+        update.effective_message.chat_id,
+        content.findAll('img')[2].get("src"))
+
+    context.bot.send_message(
+        update.effective_message.chat_id,
+        text=answer,
+        parse_mode=ParseMode.HTML,
+        disable_web_page_preview=True)
 
 
 def info(update, context):
@@ -39,10 +73,30 @@ def stats(update, context):
     context.chat_data['users'][username]['words'] += len(update.message.text)
 
 
+def today(update, context):
+    day = datetime.now().day
+    month = datetime.now().month
+    url = "https://api.wikimedia.org/feed/v1/wikipedia/ru/onthisday/all/"
+    url += f"{month}/{day}"
+    result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+
+    data = result.json()
+
+    answer = ""
+    for holiday in data['holidays']:
+        answer += holiday['text'] + "\n"
+
+    answer += "\n"
+    for selected in data['selected']:
+        answer += f"{selected['year']}: "
+        answer += f"{selected['text'].capitalize()}\n"
+
+    update.message.reply_text(answer, quote=False)
+
+
 def top(update, context):
     data = list(context.chat_data['users'].items())
     sorted_data = sorted(data, key=lambda x: x[1]['words'], reverse=True)
-
     answer = 'Топ (символы / сообщения):\n\n'
     for i, (user, data) in enumerate(sorted_data):
         answer += f"{i+1}) {user}: {data['words']} / {data['messages']}\n"
@@ -50,7 +104,7 @@ def top(update, context):
 
 
 def weather(update, context):
-    city = re.sub('Царь.*погода', '', update.message.text, flags=re.I)
+    city = re.sub(f"{BOT_NAME}.*погода", "", update.message.text, flags=re.I)
     city = city.strip().lower()
 
     nominatim_url = "https://nominatim.openstreetmap.org/search"
@@ -61,14 +115,12 @@ def weather(update, context):
         "accept-language": "russian"
     }
 
-    result = requests.get(nominatim_url, params=params).json()
-    lat = result[0]['lat']
-    lon = result[0]['lon']
+    coordinates = requests.get(nominatim_url, params=params).json()[0]
 
     weather_url = "https://api.open-meteo.com/v1/forecast"
     params = {
-        "latitude": lat,
-        "longitude": lon,
+        "latitude": coordinates['lat'],
+        "longitude": coordinates['lon'],
         "daily": {
             "temperature_2m_max",
             "temperature_2m_min",
@@ -124,12 +176,12 @@ def whoami(update, context):
 
     username = update.message.from_user.username
     context.chat_data['users'][username]['name'] = name
-    answer = f"@{username}, вы — {name}"
-    update.message.reply_text(answer, quote=False)
+
+    update.message.reply_text(f"@{username}, вы — {name}", quote=False)
 
 
 def whois(update, context):
-    who = re.sub('Царь.*кто', '', update.message.text, flags=re.I)
+    who = re.sub(f"{BOT_NAME}.*кто", "", update.message.text, flags=re.I)
     who = who.replace('?', '').strip().lower()
     who = random.choice(who_quotes) + ' ' + who + ' - @'
     who += random.choice(list(context.chat_data['users'].keys()))

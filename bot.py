@@ -2,35 +2,38 @@
 
 import logging
 import re
-import settings
+
+from settings import API_KEY, BOT_NAME, LOGGING_FORMAT
 
 from handlers import (
-    whoami, whois, info, weather, names, stats, top, quiz, quiz_answer,
-    quiztop
+    apod, info, weather, names, stats, top, today,
+    quiz, quiz_answer, quiztop, whoami, whois
 )
 
 from telegram import Update
 from telegram.ext import (
-    Filters, MessageHandler, TypeHandler, Updater, PicklePersistence,
-    CallbackQueryHandler, CommandHandler
+    CallbackQueryHandler, CommandHandler, Filters,
+    MessageHandler, PicklePersistence, TypeHandler, Updater
 )
 
 logging.basicConfig(filename='bot.log',
                     level=logging.INFO,
-                    format=settings.LOGGING_FORMAT)
+                    format=LOGGING_FORMAT)
 
 
 def main():
     db = PicklePersistence(filename='bot.db')
 
-    updater = Updater(settings.API_KEY, use_context=True, persistence=db)
+    updater = Updater(API_KEY, use_context=True, persistence=db)
     updater.dispatcher.add_handler(TypeHandler(Update, stats), -1)
 
     updater.dispatcher.add_handler(CallbackQueryHandler(quiz_answer))
 
+    updater.dispatcher.add_handler(CommandHandler('apod', apod))
     updater.dispatcher.add_handler(CommandHandler('quiztop', quiztop))
     updater.dispatcher.add_handler(CommandHandler('quiz', quiz))
     updater.dispatcher.add_handler(CommandHandler('top', top))
+    updater.dispatcher.add_handler(CommandHandler('today', today))
     updater.dispatcher.add_handler(CommandHandler('whoami', whoami))
     updater.dispatcher.add_handler(CommandHandler('names', names))
 
@@ -44,29 +47,36 @@ def main():
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*кто я.*)", re.IGNORECASE)),
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*кто я.*)",
+                           re.IGNORECASE)),
             whoami
         )
     )
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*кто.*)", re.IGNORECASE)),
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*кто.*)",
+                           re.IGNORECASE)),
             whois
         )
     )
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*(инфа|вероятность).*)", 
-                          re.IGNORECASE)),
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*(инфа|вероятность).*)",
+                           re.IGNORECASE)),
             info
         )
     )
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*погода.*)", re.IGNORECASE)),
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*погода.*)",
+                           re.IGNORECASE)),
             weather
         )
     )
