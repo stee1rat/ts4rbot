@@ -19,6 +19,23 @@ from utils import remove_job_if_exists
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 
+def anecdote(update, context):
+    url = "https://shytok.net/webmaster.php"
+    result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+    s = result.text.split('\n')[4]
+    m = re.search('document.write\(\' (.*) \'\);', s)
+    answer = str(m.group(1).replace('<br />', '\n').replace("<br>", "\n"))
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
+def fact(update, context):
+    url = "https://randstuff.ru/fact/"
+    result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+    soup = BeautifulSoup(result.text, 'html.parser')
+    answer = soup.find('div', id="fact").table.tr.td.text
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
 def apod(update, context):
     url = "http://www.astronet.ru/db/apod.html"
     result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})

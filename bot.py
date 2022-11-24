@@ -6,7 +6,7 @@ import re
 from settings import API_KEY, BOT_NAME, LOGGING_FORMAT
 
 from handlers import (
-    apod, info, weather, names, stats, top, today,
+    anecdote, apod, fact, info, weather, names, stats, top, today,
     quiz, quiz_answer, quiztop, whoami, whois
 )
 
@@ -29,7 +29,9 @@ def main():
 
     updater.dispatcher.add_handler(CallbackQueryHandler(quiz_answer))
 
+    updater.dispatcher.add_handler(CommandHandler('anecdote', anecdote))
     updater.dispatcher.add_handler(CommandHandler('apod', apod))
+    updater.dispatcher.add_handler(CommandHandler('fact', fact))
     updater.dispatcher.add_handler(CommandHandler('quiztop', quiztop))
     updater.dispatcher.add_handler(CommandHandler('quiz', quiz))
     updater.dispatcher.add_handler(CommandHandler('top', top))
@@ -39,7 +41,23 @@ def main():
 
     updater.dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(re.compile("(?i)(Царь.*кто все( |\?)*$)",
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*анекдот.*)", re.IGNORECASE)),
+            anecdote
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*факт.*)", re.IGNORECASE)),
+            fact
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(re.compile(f"(?i)({BOT_NAME}.*кто все( |\?)*$)",
                           re.IGNORECASE)),
             names
         )
