@@ -86,10 +86,6 @@ def stats(update, context):
             'messages': 0,
             'words': 0
         }
-    if username == "actium_S" and \
-        'name' not in context.chat_data['users'][username]:
-        context.chat_data['users'][username]['name'] = \
-            'старушка дней моих суровых'
 
     context.chat_data['users'][username]['messages'] += 1
     context.chat_data['users'][username]['words'] += len(update.message.text)
