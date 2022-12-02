@@ -38,7 +38,8 @@ def fact(update, context):
 
 def apod(update, context):
     url = "http://www.astronet.ru/db/apod.html"
-    result = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+    result = requests.get(
+        url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=3)
 
     soup = BeautifulSoup(result.text, 'html.parser')
     titles = soup.findAll('p', class_="title")
@@ -85,6 +86,10 @@ def stats(update, context):
             'messages': 0,
             'words': 0
         }
+    if username == "actium_S" and \
+        'name' not in context.chat_data['users'][username]:
+        context.chat_data['users'][username]['name'] = \
+            'старушка дней моих суровых'
 
     context.chat_data['users'][username]['messages'] += 1
     context.chat_data['users'][username]['words'] += len(update.message.text)
