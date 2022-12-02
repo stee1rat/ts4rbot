@@ -6,6 +6,7 @@ import re
 import requests
 import sqlite3
 
+from balaboba import Balaboba
 from bs4 import BeautifulSoup, Tag
 from constants import who, who_quotes, weather_codes
 from datetime import datetime
@@ -25,6 +26,14 @@ def anecdote(update, context):
     s = result.text.split('\n')[4]
     m = re.search('document.write\(\' (.*) \'\);', s)
     answer = str(m.group(1).replace('<br />', '\n').replace("<br>", "\n"))
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
+def blablabla(update, context):
+    bb = Balaboba()
+    text_types = bb.get_text_types(language="ru")
+    phrase = re.sub(BOT_NAME, "", update.message.text, flags=re.I)
+    answer = bb.balaboba(phrase, text_type=text_types[0])
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
@@ -72,6 +81,26 @@ def apod(update, context):
 def info(update, context):
     answer = f"Вероятность составляет: {random.randrange(100)}%"
     update.message.reply_text(answer)
+
+
+def instruction(update, context):
+    noun = re.sub(
+        f"{BOT_NAME}.*инструкция", "", update.message.text, flags=re.I)
+
+    bb = Balaboba()
+    text_types = bb.get_text_types(language="ru")
+    answer = bb.balaboba(noun, text_type=text_types[2])
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
+def recipe(update, context):
+    noun = re.sub(
+        f"{BOT_NAME}.*рецепт", "", update.message.text, flags=re.I)
+
+    bb = Balaboba()
+    text_types = bb.get_text_types(language="ru")
+    answer = bb.balaboba(noun, text_type=text_types[3])
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def stats(update, context):
@@ -204,6 +233,16 @@ def whois(update, context):
     who = random.choice(who_quotes) + ' ' + who + ' - @'
     who += random.choice(list(context.chat_data['users'].keys()))
     update.message.reply_text(who.capitalize(), quote=False)
+
+
+def wisdom(update, context):
+    noun = re.sub(
+        f"{BOT_NAME}.*мудрость", "", update.message.text, flags=re.I)
+
+    bb = Balaboba()
+    text_types = bb.get_text_types(language="ru")
+    answer = bb.balaboba(noun, text_type=text_types[4])
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def names(update, context):

@@ -6,8 +6,9 @@ import re
 from settings import API_KEY, BOT_NAME, LOGGING_FORMAT
 
 from handlers import (
-    anecdote, apod, fact, info, weather, names, stats, top, today,
-    quiz, quiz_answer, quiztop, whoami, whois
+    anecdote, apod, blablabla, fact, info, instruction, weather, names,
+    recipe, stats, top, today, quiz, quiz_answer, quiztop, whoami, whois,
+    wisdom
 )
 
 from telegram import Update
@@ -93,9 +94,49 @@ def main():
     updater.dispatcher.add_handler(
         MessageHandler(
             Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*инструкция.*)",
+                           re.IGNORECASE)),
+            instruction,
+            run_async=True
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*рецепт.*)",
+                           re.IGNORECASE)),
+            recipe,
+            run_async=True
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*мудрость.*)",
+                           re.IGNORECASE)),
+            wisdom,
+            run_async=True
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
                 re.compile(f"(?i)({BOT_NAME}.*погода.*)",
                            re.IGNORECASE)),
             weather
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*)",
+                           re.IGNORECASE)),
+            blablabla,
+            run_async=True
         )
     )
 
