@@ -14,7 +14,7 @@ from settings import BOT_NAME
 from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from utils import remove_job_if_exists
+from utils import balaboba, remove_job_if_exists
 
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
@@ -30,10 +30,8 @@ def anecdote(update, context):
 
 
 def blablabla(update, context):
-    bb = Balaboba()
-    text_types = bb.get_text_types(language="ru")
-    phrase = re.sub(BOT_NAME, "", update.message.text, flags=re.I)
-    answer = bb.balaboba(phrase, text_type=text_types[0])
+    query = re.sub(BOT_NAME, "", update.message.text, flags=re.I)
+    answer = balaboba(query, 0)
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
@@ -84,22 +82,16 @@ def info(update, context):
 
 
 def instruction(update, context):
-    noun = re.sub(
+    query = re.sub(
         f"{BOT_NAME}.*инструкция", "", update.message.text, flags=re.I)
-
-    bb = Balaboba()
-    text_types = bb.get_text_types(language="ru")
-    answer = bb.balaboba(noun, text_type=text_types[2])
+    answer = balaboba(query, 24)
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def recipe(update, context):
-    noun = re.sub(
+    query = re.sub(
         f"{BOT_NAME}.*рецепт", "", update.message.text, flags=re.I)
-
-    bb = Balaboba()
-    text_types = bb.get_text_types(language="ru")
-    answer = bb.balaboba(noun, text_type=text_types[3])
+    answer = balaboba(query, 25)
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
@@ -236,12 +228,9 @@ def whois(update, context):
 
 
 def wisdom(update, context):
-    noun = re.sub(
+    query = re.sub(
         f"{BOT_NAME}.*мудрость", "", update.message.text, flags=re.I)
-
-    bb = Balaboba()
-    text_types = bb.get_text_types(language="ru")
-    answer = bb.balaboba(noun, text_type=text_types[4])
+    answer = query + " " + balaboba(query, 11)
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 

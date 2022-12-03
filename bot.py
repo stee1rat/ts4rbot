@@ -116,8 +116,7 @@ def main():
             Filters.regex(
                 re.compile(f"(?i)({BOT_NAME}.*мудрость.*)",
                            re.IGNORECASE)),
-            wisdom,
-            run_async=True
+            wisdom
         )
     )
 
