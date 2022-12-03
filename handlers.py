@@ -6,7 +6,6 @@ import re
 import requests
 import sqlite3
 
-from balaboba import Balaboba
 from bs4 import BeautifulSoup, Tag
 from constants import who, who_quotes, weather_codes
 from datetime import datetime
@@ -14,7 +13,7 @@ from settings import BOT_NAME
 from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from utils import balaboba, remove_job_if_exists
+from utils import remove_job_if_exists
 
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
@@ -26,12 +25,6 @@ def anecdote(update, context):
     s = result.text.split('\n')[4]
     m = re.search('document.write\(\' (.*) \'\);', s)
     answer = str(m.group(1).replace('<br />', '\n').replace("<br>", "\n"))
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
-
-
-def blablabla(update, context):
-    query = re.sub(BOT_NAME, "", update.message.text, flags=re.I)
-    answer = balaboba(query, 0)
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
@@ -79,20 +72,6 @@ def apod(update, context):
 def info(update, context):
     answer = f"Вероятность составляет: {random.randrange(100)}%"
     update.message.reply_text(answer)
-
-
-def instruction(update, context):
-    query = re.sub(
-        f"{BOT_NAME}.*инструкция", "", update.message.text, flags=re.I)
-    answer = balaboba(query, 24)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
-
-
-def recipe(update, context):
-    query = re.sub(
-        f"{BOT_NAME}.*рецепт", "", update.message.text, flags=re.I)
-    answer = balaboba(query, 25)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def stats(update, context):
