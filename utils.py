@@ -1,7 +1,10 @@
-import urllib.request
 import json
+import re
+import urllib.request
 
 from fake_headers import Headers
+from settings import BOT_NAME
+from telegram.ext import Filters, MessageHandler
 
 
 def balaboba(query, intro):
@@ -22,3 +25,9 @@ def remove_job_if_exists(name, context):
         job.schedule_removal()
     return True
 
+
+def getMessageHandler(cmd, func, sync=False):
+    return MessageHandler(
+        Filters.regex(re.compile(f"(?i)({BOT_NAME}.*{cmd}.*)", re.IGNORECASE)),
+        func,
+        sync)

@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import re
 
-from settings import API_KEY, BOT_NAME, LOGGING_FORMAT
-
-from handlers import (
-    anecdote, apod, fact, info, weather, names, instruction, recipe,
-    stats, top, today, quiz, quiz_answer, quiztop, whoami, whois, wisdom
-)
-
+from handlers import (anecdote, apod, fact, info, instruction, names, quiz,
+                      quiz_answer, quiztop, recipe, stats, today, top, weather,
+                      whoami, whois, wiki, wisdom)
+from settings import API_KEY, LOGGING_FORMAT
+from utils import getMessageHandler
 from telegram import Update
-from telegram.ext import (
-    CallbackQueryHandler, CommandHandler, Filters,
-    MessageHandler, PicklePersistence, TypeHandler, Updater
-)
+from telegram.ext import (CallbackQueryHandler, CommandHandler,
+                          PicklePersistence, TypeHandler, Updater)
 
 logging.basicConfig(filename='bot.log',
                     level=logging.INFO,
@@ -39,95 +34,20 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('whoami', whoami))
     updater.dispatcher.add_handler(CommandHandler('names', names))
 
+    updater.dispatcher.add_handler(getMessageHandler("кто все", names))
+    updater.dispatcher.add_handler(getMessageHandler("кто я", whoami))
+    updater.dispatcher.add_handler(getMessageHandler("кто", whois))
     updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*анекдот.*)", re.IGNORECASE)),
-            anecdote
-        )
-    )
+        getMessageHandler("(инфа|вероятность)", info))
+
+    updater.dispatcher.add_handler(getMessageHandler("погода", weather))
 
     updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*факт.*)", re.IGNORECASE)),
-            fact
-        )
-    )
+        getMessageHandler("инструкция", instruction, True))
 
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(re.compile(f"(?i)({BOT_NAME}.*кто все( |\?)*$)",
-                          re.IGNORECASE)),
-            names
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*кто я.*)",
-                           re.IGNORECASE)),
-            whoami
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*кто.*)",
-                           re.IGNORECASE)),
-            whois
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*(инфа|вероятность).*)",
-                           re.IGNORECASE)),
-            info
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*погода.*)",
-                           re.IGNORECASE)),
-            weather
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*инструкция.*)",
-                           re.IGNORECASE)),
-            instruction,
-            run_async=True
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*рецепт.*)",
-                           re.IGNORECASE)),
-            recipe,
-            run_async=True
-        )
-    )
-
-    updater.dispatcher.add_handler(
-        MessageHandler(
-            Filters.regex(
-                re.compile(f"(?i)({BOT_NAME}.*мудрость.*)",
-                           re.IGNORECASE)),
-            wisdom
-        )
-    )
-
+    updater.dispatcher.add_handler(getMessageHandler("рецепт", recipe, True))
+    updater.dispatcher.add_handler(getMessageHandler("мудрость", wisdom, True))
+    updater.dispatcher.add_handler(getMessageHandler("что такое", wiki, True))
 
     updater.start_polling()
     updater.idle()

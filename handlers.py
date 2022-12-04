@@ -227,14 +227,20 @@ def wisdom(update, context):
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
+def wiki(update, context):
+    query = re.sub(
+        f"{BOT_NAME}.*что такое", "", update.message.text, flags=re.I)
+    answer = query + balaboba(query, 8)
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
 def names(update, context):
     answer = ''
     for user, data in context.chat_data['users'].items():
         if data['name']:
             answer += f"*{user}* - {data['name']}\n"
     update.message.reply_text(
-        answer, quote=False, parse_mode=ParseMode.MARKDOWN
-    )
+        answer, quote=False, parse_mode=ParseMode.MARKDOWN)
 
 
 def quiz(update, context):
