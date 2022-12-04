@@ -78,14 +78,14 @@ def instruction(update, context):
     query = re.sub(
         f"{BOT_NAME}.*инструкция", "", update.message.text, flags=re.I)
     answer = balaboba(query, 24)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
+    update.message.reply_text(answer)
 
 
 def recipe(update, context):
     query = re.sub(
         f"{BOT_NAME}.*рецепт", "", update.message.text, flags=re.I)
     answer = balaboba(query, 25)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
+    update.message.reply_text(answer)
 
 
 def stats(update, context):
@@ -224,14 +224,14 @@ def wisdom(update, context):
     query = re.sub(
         f"{BOT_NAME}.*мудрость", "", update.message.text, flags=re.I)
     answer = query + " " + balaboba(query, 11)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
+    update.message.reply_text(answer)
 
 
 def wiki(update, context):
     query = re.sub(
         f"{BOT_NAME}.*что такое", "", update.message.text, flags=re.I)
     answer = query + balaboba(query, 8)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
+    update.message.reply_text(answer)
 
 
 def names(update, context):
