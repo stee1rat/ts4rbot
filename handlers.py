@@ -81,6 +81,13 @@ def instruction(update, context):
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
+def recipe(update, context):
+    query = re.sub(
+        f"{BOT_NAME}.*рецепт", "", update.message.text, flags=re.I)
+    answer = balaboba(query, 25)
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
 def stats(update, context):
     username = update.message.from_user.username
 
@@ -211,6 +218,13 @@ def whois(update, context):
     who = random.choice(who_quotes) + ' ' + who + ' - @'
     who += random.choice(list(context.chat_data['users'].keys()))
     update.message.reply_text(who.capitalize(), quote=False)
+
+
+def wisdom(update, context):
+    query = re.sub(
+        f"{BOT_NAME}.*мудрость", "", update.message.text, flags=re.I)
+    answer = query + " " + balaboba(query, 11)
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def names(update, context):

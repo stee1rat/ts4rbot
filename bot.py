@@ -6,8 +6,8 @@ import re
 from settings import API_KEY, BOT_NAME, LOGGING_FORMAT
 
 from handlers import (
-    anecdote, apod, fact, info, weather, names, instruction,
-    stats, top, today, quiz, quiz_answer, quiztop, whoami, whois,
+    anecdote, apod, fact, info, weather, names, instruction, recipe,
+    stats, top, today, quiz, quiz_answer, quiztop, whoami, whois, wisdom
 )
 
 from telegram import Update
@@ -108,6 +108,26 @@ def main():
             run_async=True
         )
     )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*рецепт.*)",
+                           re.IGNORECASE)),
+            recipe,
+            run_async=True
+        )
+    )
+
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*мудрость.*)",
+                           re.IGNORECASE)),
+            wisdom
+        )
+    )
+
 
     updater.start_polling()
     updater.idle()
