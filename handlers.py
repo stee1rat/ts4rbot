@@ -13,7 +13,7 @@ from settings import BOT_NAME
 from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from utils import remove_job_if_exists
+from utils import remove_job_if_exists, balaboba
 
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
@@ -72,6 +72,13 @@ def apod(update, context):
 def info(update, context):
     answer = f"Вероятность составляет: {random.randrange(100)}%"
     update.message.reply_text(answer)
+
+
+def instruction(update, context):
+    query = re.sub(
+        f"{BOT_NAME}.*инструкция", "", update.message.text, flags=re.I)
+    answer = balaboba(query, 24)
+    context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def stats(update, context):
@@ -204,13 +211,6 @@ def whois(update, context):
     who = random.choice(who_quotes) + ' ' + who + ' - @'
     who += random.choice(list(context.chat_data['users'].keys()))
     update.message.reply_text(who.capitalize(), quote=False)
-
-
-def wisdom(update, context):
-    query = re.sub(
-        f"{BOT_NAME}.*мудрость", "", update.message.text, flags=re.I)
-    answer = query + " " + balaboba(query, 11)
-    context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
 def names(update, context):

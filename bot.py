@@ -6,7 +6,7 @@ import re
 from settings import API_KEY, BOT_NAME, LOGGING_FORMAT
 
 from handlers import (
-    anecdote, apod, fact, info, weather, names,
+    anecdote, apod, fact, info, weather, names, instruction,
     stats, top, today, quiz, quiz_answer, quiztop, whoami, whois,
 )
 
@@ -99,6 +99,15 @@ def main():
         )
     )
 
+    updater.dispatcher.add_handler(
+        MessageHandler(
+            Filters.regex(
+                re.compile(f"(?i)({BOT_NAME}.*инструкция.*)",
+                           re.IGNORECASE)),
+            instruction,
+            run_async=True
+        )
+    )
 
     updater.start_polling()
     updater.idle()
