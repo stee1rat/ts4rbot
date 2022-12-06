@@ -26,8 +26,8 @@ def remove_job_if_exists(name, context):
     return True
 
 
-def getMessageHandler(cmd, func, sync=False):
+def getMessageHandler(cmd, func, run_async=False):
     return MessageHandler(
         Filters.regex(re.compile(f"(?i)({BOT_NAME}.*{cmd}.*)", re.IGNORECASE)),
         func,
-        sync)
+        run_async=run_async)

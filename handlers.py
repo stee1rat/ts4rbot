@@ -36,6 +36,13 @@ def fact(update, context):
     context.bot.send_message(update.effective_message.chat_id, text=answer)
 
 
+def film(update, context):
+    query = re.sub(
+        f"{BOT_NAME}.*фильм", "", update.message.text, flags=re.I)
+    answer = balaboba(query, 9)
+    update.message.reply_text(answer)
+
+
 def apod(update, context):
     url = "http://www.astronet.ru/db/apod.html"
     result = requests.get(
