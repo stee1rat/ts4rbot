@@ -96,7 +96,10 @@ def recipe(update, context):
 
 
 def stats(update, context):
-    username = update.message.from_user.username
+    if update.message.from_user.username == None:
+        username = update.message.from_user.name
+    else:
+        username = update.message.from_user.username
 
     if 'users' not in context.chat_data:
         context.chat_data['users'] = {}
