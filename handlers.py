@@ -9,6 +9,7 @@ import sqlite3
 from bs4 import BeautifulSoup, Tag
 from constants import who, who_quotes, weather_codes
 from datetime import datetime
+from pprint import pprint
 from settings import BOT_NAME
 from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -55,7 +56,11 @@ def apod(update, context):
 
     soup = BeautifulSoup(result.text, 'html.parser')
     content = soup.find('div', id='content')
-    cur = content.find('b', text='Пояснение:').next_sibling
+
+    explanation = content.find('b', text='Пояснение:')
+    if explanation is None:
+        explanation = content.find('b', text='Explanation:')
+    cur = explanation.next_sibling
 
     answer = ''
     while cur.name != 'p':
@@ -96,23 +101,51 @@ def recipe(update, context):
 
 
 def stats(update, context):
-    if update.message.from_user.username == None:
-        username = update.message.from_user.name
-    else:
-        username = update.message.from_user.username
+    if update.message is None:
+        return
+
+    username = update.message.from_user.name
+    id = update.message.from_user.id
 
     if 'users' not in context.chat_data:
         context.chat_data['users'] = {}
 
-    if username not in context.chat_data['users']:
-        context.chat_data['users'][username] = {
-            'name': '',
-            'messages': 0,
-            'words': 0
-        }
+    if id not in context.chat_data['users']:
+        if username not in context.chat_data['users']:
+            ###### keep this block
+            context.chat_data['users'][id] = {
+                'username': '',
+                'messages': 0,
+                'words': 0,
+            }
+            ###### ^^ keep this block
+        else:
+            context.chat_data['users'][id] = {
+                'username': username,
+                'messages': context.chat_data['users'][username]['messages'],
+                'words': context.chat_data['users'][username]['words'],
+            }
 
-    context.chat_data['users'][username]['messages'] += 1
-    context.chat_data['users'][username]['words'] += len(update.message.text)
+    if username.strip('@') in context.chat_data['users']:
+        del context.chat_data['users'][username.strip('@')]
+
+    context.chat_data['users'][id]['username'] = username
+    context.chat_data['users'][id]['messages'] += 1
+    context.chat_data['users'][id]['words'] += len(update.message.text)
+
+    pprint(context.chat_data)
+
+    # REMOVE THE CODE BELOW
+    if 'quiz_stats' in context.chat_data:
+        print("MIGRATION")
+        if None in context.chat_data['quiz_stats']:
+            del context.chat_data['quiz_stats'][None]
+        for (user, data) in context.chat_data['users'].items():
+            print(user, data['username'].strip('@'))
+            if data['username'].strip('@') in context.chat_data['quiz_stats']:
+                print("EXISTS")
+                data['quiz'] = context.chat_data['quiz_stats'][data['username'].strip('@')]
+        del context.chat_data['quiz_stats']
 
 
 def today(update, context):
@@ -141,7 +174,13 @@ def top(update, context):
     sorted_data = sorted(data, key=lambda x: x[1]['words'], reverse=True)
     answer = 'Топ (символы / сообщения):\n\n'
     for i, (user, data) in enumerate(sorted_data):
-        answer += f"{i+1}) {user}: {data['words']} / {data['messages']}\n"
+        # leave only data['username']
+        if 'username' not in data:
+            name = user
+        else:
+            name = data['username'].strip('@')
+        #name = user if 'username' not in data else data['username']
+        answer += f"{i+1}) {name}: {data['words']} / {data['messages']}\n"
     update.message.reply_text(answer, quote=False)
 
 
@@ -216,18 +255,20 @@ def whoami(update, context):
     name += random.choice(who[0]) + ' ' + random.choice(who[1])
     name += ' ' + extension['1'] if '1' in extension else ''
 
-    username = update.message.from_user.username
-    context.chat_data['users'][username]['name'] = name
+    id = update.message.from_user.id
+    context.chat_data['users'][id]['name'] = name
 
-    update.message.reply_text(f"@{username}, вы — {name}", quote=False)
+    username = context.chat_data['users'][id]['username']
+    update.message.reply_text(f"{username}, вы — {name}", quote=False)
 
 
 def whois(update, context):
     who = re.sub(f"{BOT_NAME}.*кто", "", update.message.text, flags=re.I)
     who = who.replace('?', '').strip().lower()
-    who = random.choice(who_quotes) + ' ' + who + ' - @'
-    who += random.choice(list(context.chat_data['users'].keys()))
-    update.message.reply_text(who.capitalize(), quote=False)
+    id = random.choice(list(context.chat_data['users'].keys()))
+    name = context.chat_data['users'][id]['username']
+    who = f"{random.choice(who_quotes)} {who} - ".capitalize() + name
+    update.message.reply_text(who, quote=False)
 
 
 def wisdom(update, context):
@@ -247,8 +288,9 @@ def wiki(update, context):
 def names(update, context):
     answer = ''
     for user, data in context.chat_data['users'].items():
-        if data['name']:
-            answer += f"*{user}* - {data['name']}\n"
+        if 'name' in data and data['name']:
+            if 'username' in data:
+                answer += f"*{data['username'].strip('@')}* - {data['name']}\n"
     update.message.reply_text(
         answer, quote=False, parse_mode=ParseMode.MARKDOWN)
 
@@ -309,7 +351,7 @@ def quiz(update, context):
     }
 
     context.job_queue.run_once(
-        quiz_finish, 15, name="quiz" + str(chat_id), context=data
+        quiz_finish, 10, name="quiz" + str(chat_id), context=data
     )
 
 
@@ -318,42 +360,36 @@ def quiz_answer(update, context):
     query.answer()
     for job in context.job_queue.jobs():
         if job.name == "quiz" + str(update.effective_message.chat_id):
-            username = query.from_user.username
             if "quiz" not in job.context:
                 job.context["quiz"] = {}
-            job.context["quiz"][username] = query.data
+            job.context["quiz"][query.from_user.id] = query.data
             break
 
 
 def quiz_finish(context):
     job = context.job.context
-    correct_answer = job['correct_answer']
-    correct_index = job['correct_index']
-    chat_data = job['context'].chat_data
-    chat_id = job['chat_id']
 
-    if "quiz_stats" not in chat_data:
-        chat_data["quiz_stats"] = {}
+    correct_answer = job["correct_answer"]
+    correct_index = job["correct_index"]
+    question = job["question"]
+    chat_id = job["chat_id"]
+    users = job["context"].chat_data["users"]
 
-    reply = job["question"] + "\n\n"
-    reply += f"Правильный ответ: {correct_answer}\n\n"
+    reply = f"{question}\n\nПравильный ответ: {correct_answer}\n\n"
 
     if "quiz" in job:
-        for username, value in job["quiz"].items():
-            if username not in chat_data["quiz_stats"]:
-                chat_data["quiz_stats"][username] = {
-                    "answers": 0,
-                    "correct": 0
-                }
+        for id, value in job["quiz"].items():
+            if "quiz" not in users[id]:
+                users[id]["quiz"] = {"answers": 0, "correct": 0}
 
-            chat_data["quiz_stats"][username]["answers"] += 1
-
+            users[id]["quiz"]["answers"] += 1
             if int(value.split(',')[0]) == correct_index:
                 result = "правильно"
-                chat_data["quiz_stats"][username]["correct"] += 1
+                users[id]["quiz"]["correct"] += 1
             else:
                 result = f"неправильно ({value.split(',')[1]})"
 
+            username = users[id]['username'].strip('@')
             reply += f"{username} ответил {result}\n"
 
     context.bot.edit_message_text(
@@ -362,15 +398,19 @@ def quiz_finish(context):
 
 
 def quiztop(update, context):
-    data = list(context.chat_data['quiz_stats'].items())
+    users = context.chat_data['users'].items()
+    filtered = list(filter(lambda x: 'quiz' in x[1], users))
     sorted_data = sorted(
-        data, key=lambda x: x[1]['correct']/x[1]['answers'], reverse=True
+        filtered,
+        key=lambda x: x[1]['quiz']['correct']/x[1]['quiz']['answers'],
+        reverse=True
     )
-
     answer = 'Статистика ответов:\n\n'
     for i, (user, data) in enumerate(sorted_data):
-        answer += f"{i+1}) {user}: "
-        answer += f"{data['correct']} / {data['answers']} "
-        answer += f"({round(data['correct']/data['answers']*100)}%)\n"
-
+        correct = data['quiz']['correct']
+        answers = data['quiz']['answers']
+        username = data['username'].strip('@')
+        answer += f"{i+1}) {username}: "
+        answer += f"{correct} / {answers} "
+        answer += f"({round(correct/answers*100)}%)\n"
     update.message.reply_text(answer, quote=False)
