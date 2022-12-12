@@ -111,14 +111,14 @@ def stats(update, context):
         context.chat_data['users'] = {}
 
     if id not in context.chat_data['users']:
-        if username not in context.chat_data['users']:
-            ###### keep this block
+        if username.strip('@') not in context.chat_data['users']:
+            # keep this block
             context.chat_data['users'][id] = {
                 'username': '',
                 'messages': 0,
                 'words': 0,
             }
-            ###### ^^ keep this block
+            # ^^ keep this block
         else:
             context.chat_data['users'][id] = {
                 'username': username,
