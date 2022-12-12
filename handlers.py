@@ -122,8 +122,8 @@ def stats(update, context):
         else:
             context.chat_data['users'][id] = {
                 'username': username,
-                'messages': context.chat_data['users'][username]['messages'],
-                'words': context.chat_data['users'][username]['words'],
+                'messages': context.chat_data['users'][username.strip('@')]['messages'],
+                'words': context.chat_data['users'][username.strip('@')]['words'],
             }
 
     if username.strip('@') in context.chat_data['users']:
