@@ -14,7 +14,7 @@ from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from utils import remove_job_if_exists, balaboba
-
+from pprint import pprint
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
@@ -140,8 +140,7 @@ def stats(update, context):
     context.chat_data['users'][id]['messages'] += 1
     context.chat_data['users'][id]['words'] += len(update.message.text)
 
-#    pprint(context.chat_data)
-    print(context.chat_data)
+    pprint(context.chat_data)
 
     # REMOVE THE CODE BELOW
     if 'quiz_stats' in context.chat_data:
