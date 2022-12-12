@@ -2,9 +2,9 @@
 
 import logging
 
-from handlers import (anecdote, apod, fact, film, info, instruction, names,
-                      quiz, quiz_answer, quiztop, recipe, stats, today, top,
-                      weather, whoami, whois, wiki, wisdom)
+from handlers import (anecdote, apod, choose, fact, film, info, instruction,
+                      names, quiz, quiz_answer, quiztop, recipe, stats, today,
+                      top, weather, whoami, whois, wiki, wisdom)
 from settings import API_KEY, LOGGING_FORMAT
 from utils import getMessageHandler
 from telegram import Update
@@ -34,6 +34,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('whoami', whoami))
     updater.dispatcher.add_handler(CommandHandler('names', names))
 
+    updater.dispatcher.add_handler(getMessageHandler("выбери", choose, True))
     updater.dispatcher.add_handler(getMessageHandler("кто все", names))
     updater.dispatcher.add_handler(getMessageHandler("кто я", whoami))
     updater.dispatcher.add_handler(getMessageHandler("кто", whois))

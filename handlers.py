@@ -9,7 +9,6 @@ import sqlite3
 from bs4 import BeautifulSoup, Tag
 from constants import who, who_quotes, weather_codes
 from datetime import datetime
-from pprint import pprint
 from settings import BOT_NAME
 from telegram import ParseMode
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -27,6 +26,14 @@ def anecdote(update, context):
     m = re.search('document.write\(\' (.*) \'\);', s)
     answer = str(m.group(1).replace('<br />', '\n').replace("<br>", "\n"))
     context.bot.send_message(update.effective_message.chat_id, text=answer)
+
+
+def choose(update, context):
+    query = re.sub(
+        f"{BOT_NAME}.*выбери", "", update.message.text, flags=re.I)
+    options = query.split("или")
+    answer = f"Я выбираю: {random.choice(options).strip()}"
+    update.message.reply_text(answer)
 
 
 def fact(update, context):
@@ -133,7 +140,8 @@ def stats(update, context):
     context.chat_data['users'][id]['messages'] += 1
     context.chat_data['users'][id]['words'] += len(update.message.text)
 
-    pprint(context.chat_data)
+#    pprint(context.chat_data)
+    print(context.chat_data)
 
     # REMOVE THE CODE BELOW
     if 'quiz_stats' in context.chat_data:
@@ -145,7 +153,8 @@ def stats(update, context):
             if data['username'].strip('@') in context.chat_data['quiz_stats']:
                 print("EXISTS")
                 data['quiz'] = context.chat_data['quiz_stats'][data['username'].strip('@')]
-        del context.chat_data['quiz_stats']
+                del context.chat_data['quiz_stats'][data['username'].strip('@')]
+        #del context.chat_data['quiz_stats'] 
 
 
 def today(update, context):
