@@ -143,6 +143,8 @@ def stats(update, context):
     pprint(context.chat_data)
 
     # REMOVE THE CODE BELOW
+    if None in context.chat_data['users']:
+        del context.chat_data['users'][None]
     if 'quiz_stats' in context.chat_data:
         print("MIGRATION")
         if None in context.chat_data['quiz_stats']:
